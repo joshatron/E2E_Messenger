@@ -4,6 +4,22 @@ End-to-End Encrypted Messenger
 This will be a simple E2E encrypted messaging command-line app.
 There will be a server component and a client component.
 
+Usage
+-----
+
+First you need to setup the environment.
+The most basic way is to run the setup script:
+
+    ./setup
+
+If you want to use venv to keep the requirements contained to just the application, run:
+
+    ./venvSetup
+
+To start the server after you have set everything up:
+
+    ./runServer
+
 Server
 ------
 
