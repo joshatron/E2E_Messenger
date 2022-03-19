@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+# Make sure python3 is installed
+command -v pip3 >/dev/null 2>&1 || { echo >&2 "pip3 is required for setup. Aborting."; exit 1; }
+# Make sure you are in directory of script
+cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null
+
+# Install all packages
+pip3 install -r requirements.txt
