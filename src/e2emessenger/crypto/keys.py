@@ -1,3 +1,4 @@
+import os
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 
@@ -15,6 +16,7 @@ def save_keypair(private_key, loc):
 
     with open(loc + '/' + KEY_FILE_NAME, 'w', encoding="utf-8") as private_key_file:
         private_key_file.write(private_contents.decode("utf-8"))
+    os.chmod(loc + '/' + KEY_FILE_NAME, 0o600)
 
 
 def load_keypair(loc):
