@@ -14,11 +14,13 @@ def save_keypair(private_key, loc):
                                                  format=serialization.PrivateFormat.TraditionalOpenSSL,
                                                  encryption_algorithm=serialization.NoEncryption())
 
-    with open(loc + '/' + KEY_FILE_NAME, 'w', encoding="utf-8") as private_key_file:
+    key_path = os.path.join(loc, KEY_FILE_NAME)
+    with open(key_path, 'w', encoding="utf-8") as private_key_file:
         private_key_file.write(private_contents.decode("utf-8"))
-    os.chmod(loc + '/' + KEY_FILE_NAME, 0o600)
+    os.chmod(key_path, 0o600)
 
 
 def load_keypair(loc):
-    with open(loc + '/' + KEY_FILE_NAME, 'rb') as private_key_file:
+    key_path = os.path.join(loc, KEY_FILE_NAME)
+    with open(key_path, 'rb') as private_key_file:
         return serialization.load_pem_private_key(private_key_file.read(), password=None)
