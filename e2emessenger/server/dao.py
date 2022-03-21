@@ -20,18 +20,19 @@ class ServerDAO(ABC):
         pass
 
     @abstractmethod
-    def save_user_message(self, sender, recipient, signature, contents):
+    def save_user_message(self, sender, recipient, date_time, signature, contents):
         pass
 
 
 class InMemoryDAO(ServerDAO):
     public_key_name = "public_key"
     username_name = "username"
-    last_timestamp_name = "last_timestamp"
+    last_date_time_name = "last_date_time"
 
     messages_name = "messages"
     message_sender_name = "sender"
     message_recipient_name = "recipient"
+    message_date_time_name = "date_time"
     message_signature_name = "signature"
     message_contents_name = "contents"
 
@@ -46,7 +47,7 @@ class InMemoryDAO(ServerDAO):
                 self.username_name: username,
                 self.public_key_name: public_key,
                 self.messages_name: [],
-                self.last_timestamp_name: datetime.min,
+                self.last_date_time_name: datetime.min,
             }
             return True
 
@@ -58,7 +59,7 @@ class InMemoryDAO(ServerDAO):
                 self.username_name: "",
                 self.public_key_name: "",
                 self.messages_name: [],
-                self.last_timestamp_name: datetime.min,
+                self.last_date_time_name: datetime.min,
             }
 
     def get_user_pending_messages(self, username):
@@ -71,10 +72,11 @@ class InMemoryDAO(ServerDAO):
         if username in self.users:
             self.users[username][self.messages_name] = []
 
-    def save_user_message(self, sender, recipient, signature, contents):
+    def save_user_message(self, sender, recipient, date_time, signature, contents):
         message = {
             self.message_sender_name: sender,
             self.message_recipient_name: recipient,
+            self.message_date_time_name: date_time,
             self.message_signature_name: signature,
             self.message_contents_name: contents,
         }
