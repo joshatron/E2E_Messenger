@@ -3,8 +3,6 @@ from ..crypto import signature
 from ..crypto import message
 
 private_key = keys.generate_keypair()
-keys.save_keypair(private_key=private_key, loc='client_data')
-new_private_key = keys.load_keypair(loc='client_data')
 
 username = 'Joshua'
 date_time = signature.current_date_time()
