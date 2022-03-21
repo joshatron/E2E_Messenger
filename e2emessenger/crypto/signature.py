@@ -1,3 +1,4 @@
+import base64
 from datetime import datetime
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -22,14 +23,17 @@ def __hash():
 
 
 def generate_signature(private_key, username, date_time):
-    return private_key.sign(__signature_message(username=username, date_time=date_time),
-                            __padding(),
-                            __hash())
+    signature = private_key.sign(__signature_message(username=username, date_time=date_time),
+                                 __padding(),
+                                 __hash())
+
+    return base64.b64encode(signature).decode('utf-8')
 
 
 def check_signature(public_key, signature, username, date_time):
     try:
-        public_key.verify(signature,
+        decoded_signature = base64.b64decode(signature)
+        public_key.verify(decoded_signature,
                           __signature_message(
                               username=username, date_time=date_time),
                           __padding(),
