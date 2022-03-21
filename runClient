@@ -14,4 +14,4 @@ command -v python >/dev/null 2>&1 || { echo >&2 "python required to run the clie
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null
 
 # Run server command
-python -m src.e2emessenger.client.client
+python -m e2emessenger.client.client
