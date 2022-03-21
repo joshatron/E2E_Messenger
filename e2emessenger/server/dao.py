@@ -1,3 +1,4 @@
+from datetime import datetime
 from abc import ABC, abstractmethod
 
 
@@ -26,6 +27,7 @@ class ServerDAO(ABC):
 class InMemoryDAO(ServerDAO):
     public_key_name = "public_key"
     username_name = "username"
+    last_timestamp_name = "last_timestamp"
 
     messages_name = "messages"
     message_sender_name = "sender"
@@ -44,19 +46,19 @@ class InMemoryDAO(ServerDAO):
                 self.username_name: username,
                 self.public_key_name: public_key,
                 self.messages_name: [],
+                self.last_timestamp_name: datetime.min,
             }
             return True
 
     def get_user_info(self, username):
         if username in self.users:
-            return {
-                self.username_name: username,
-                self.public_key_name: self.users[username][self.public_key_name],
-            }
+            return self.users[username]
         else:
             return {
                 self.username_name: "",
                 self.public_key_name: "",
+                self.messages_name: [],
+                self.last_timestamp_name: datetime.min,
             }
 
     def get_user_pending_messages(self, username):
