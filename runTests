@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+# If using venv to install, active it before running
+if [ -d ".venv" ]
+then
+    source .venv/bin/activate
+fi
+
+# Make sure uvicorn is installed
+command -v python >/dev/null 2>&1 || { echo >&2 "python required to run the client. Please first run the setup procedure. Aborting."; exit 1; }
+# Make sure you are in directory of script
+cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null
+
+# Run server command
+python -m unittest e2emessenger.tests.test

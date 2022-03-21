@@ -15,4 +15,4 @@ python3 -m venv .venv
 # Activate new virtualenv
 source .venv/bin/activate
 # Install all required packages for app
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
