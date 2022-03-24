@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from service import ServerServices
+from dao import InMemoryDAO
 
 
 class RegisterInfo(BaseModel):
@@ -14,6 +16,9 @@ class SendMessageInfo(BaseModel):
     message: str
 
 
+dao = InMemoryDAO()
+service = ServerServices(dao)
+
 app = FastAPI()
 
 
@@ -24,19 +29,23 @@ async def root():
 
 @app.put("/v1/user/register")
 async def register_user(register_info: RegisterInfo):
-    return {"status": True}
+    return {"status": service.register_user(username=register_info.username, public_key=register_info.public_key)}
 
 
 @app.get("/v1/user/{username}")
 async def get_user_info(username: str):
-    return {"username": "", "public_key": ""}
+    return service.get_user_info(username)
 
 
 @app.put("/v1/user/{username}/message/send")
 async def send_message_to_user(username: str, send_message_info: SendMessageInfo):
-    return {"status": True}
+    return {"status": service.send_message_to_user(sender=send_message_info.username,
+                                                   recipient=username,
+                                                   date_time=send_message_info.date_time,
+                                                   signature=send_message_info.signature,
+                                                   message=send_message_info.message)}
 
 
 @app.get("/v1/user/{username}/message/read")
 async def read_messages(username: str, date_time: str, signature: str):
-    return []
+    return service.read_messages(username=username, date_time=date_time, signature=signature)
