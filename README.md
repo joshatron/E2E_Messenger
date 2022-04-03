@@ -49,7 +49,7 @@ Server response:
         Username exists: 409 status code
         Bad input: 400 status code
 
-#### GET /v1/user/info
+#### GET /v1/user/{username}
 
 This endpoint returns all information about the user, their public key and username.
 
@@ -68,7 +68,7 @@ Server response:
         Username not found: 404 status code
         Bad input: 400 status code
 
-#### PUT /v1/message/send
+#### PUT /v1/user/{username}/message/send
 
 This endpoint is used to send a message from one user to another.
 The body should contain the sender username with their signature, the recipient username, and the message, encrypted with the recipient's public key and base64 encoded.
@@ -82,6 +82,7 @@ Request body:
             "time": "[CURRENT TIMESTAMP IN ISO FORMAT]",
             "signature": "[BASE64 ENCODED SIGNATURE OF USERNAME AND TIMESTAMP]"
         },
+        "recipient": "[RECIPIENT USERNAME]"
         "message": "[BASE64 ENCODED ENCRYPTED MESSAGE BLOCK]"
     }
 
@@ -92,7 +93,7 @@ Server response:
         Auth failure: 401 status code
         Bad input: 400 status code
 
-#### POST /v1/message/read
+#### POST /v1/user/{username}/message/read
 
 At any time, a user can request all their unread messages.
 They authenticate with their digital signature.

@@ -11,15 +11,25 @@ class ClientDAO(ABC):
     def load_user_data(self):
         pass
 
+    @abstractmethod
+    def save_peers(self, peers):
+        pass
+
+    @abstractmethod
+    def load_peers(self):
+        pass
+
 
 class FileBasedClientDAO(ClientDAO):
     KEY_FILE_NAME = "key.private"
     USERNAME_FILE_NAME = "username.txt"
+    PEER_KEY_FOLDER_NAME = "peers"
 
     def __init__(self, base_dir):
         self.base_dir = base_dir
         try:
             os.mkdir(self.base_dir)
+            os.mkdir(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME))
         except FileExistsError:
             pass
 
@@ -40,3 +50,17 @@ class FileBasedClientDAO(ClientDAO):
             return (username, keypair_contents)
         except IOError:
             return ('', '')
+
+    def save_peers(self, peers):
+        for peer in peers:
+            with open(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME, peer), "w+", encoding="utf-8") as peer_file:
+                peer_file.write(peers[peer])
+
+    def load_peers(self):
+        peers = {}
+
+        for peer in os.listdir(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME)):
+            with open(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME, peer), "r", encoding="utf-8") as peer_file:
+                peers[peer] = peer_file.read()
+
+        return peers

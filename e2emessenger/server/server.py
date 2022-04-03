@@ -40,7 +40,10 @@ async def register_user(register_info: RegisterInfo, response: Response):
 
 
 @app.get("/v1/user/{username}")
-async def get_user_info(username: str):
+async def get_user_info(username: str, response: Response):
+    user_info = service.get_user_info(username)
+    if len(user_info['username']) == 0:
+        response.status_code = status.HTTP_404_NOT_FOUND
     return service.get_user_info(username)
 
 
