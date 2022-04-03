@@ -4,6 +4,8 @@ End-to-End Encrypted Messenger
 This will be a simple E2E encrypted messaging command-line app.
 There will be a server component and a client component.
 
+Please note that this is designed for a class, and probably shouldn't be trusted in a production setting.
+
 Usage
 -----
 

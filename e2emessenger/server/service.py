@@ -6,8 +6,8 @@ class ServerServices():
     def __init__(self, dao):
         self.dao = dao
 
-    def register_user(self, username, public_key):
-        return self.dao.create_user(username, public_key)
+    def register_user(self, username, public_key, time):
+        return self.dao.create_user(username, public_key, time)
 
     def get_user_info(self, username):
         user_info = self.dao.get_user_info(username)

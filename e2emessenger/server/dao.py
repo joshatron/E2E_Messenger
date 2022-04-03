@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 class ServerDAO(ABC):
     @abstractmethod
-    def create_user(self, username, public_key):
+    def create_user(self, username, public_key, time):
         pass
 
     @abstractmethod
@@ -39,7 +39,7 @@ class InMemoryDAO(ServerDAO):
     def __init__(self):
         self.users = {}
 
-    def create_user(self, username, public_key):
+    def create_user(self, username, public_key, time):
         if username in self.users:
             return False
         else:
@@ -47,7 +47,7 @@ class InMemoryDAO(ServerDAO):
                 self.username_name: username,
                 self.public_key_name: public_key,
                 self.messages_name: [],
-                self.last_date_time_name: datetime.min,
+                self.last_date_time_name: datetime.fromisoformat(time),
             }
             return True
 
