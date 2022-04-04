@@ -1,3 +1,4 @@
+from datetime import datetime
 from ..crypto import keys
 from ..crypto import signature
 
@@ -14,7 +15,14 @@ class ServerServices():
         return {"username": user_info["username"], "public_key": user_info["public_key"]}
 
     def authenticate_user(self, auth):
-        return True
+        request_time = datetime.fromisoformat(auth.time)
+        user_info = self.dao.get_user_info(auth.username)
+        if auth.username == user_info['username'] and request_time > user_info['last_date_time'] and signature.check_signature(
+                keys.import_public_key(user_info['public_key']), auth.signature, auth.username, request_time):
+            self.dao.update_user_auth_time(auth.username, request_time)
+            return True
+        else:
+            return False
 
     def send_message_to_user(self, recipient, message):
         self.dao.save_user_message(recipient, message)

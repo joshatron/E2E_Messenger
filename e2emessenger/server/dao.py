@@ -12,6 +12,10 @@ class ServerDAO(ABC):
         pass
 
     @abstractmethod
+    def update_user_auth_time(self, username, date_time):
+        pass
+
+    @abstractmethod
     def get_user_pending_messages(self, username):
         pass
 
@@ -56,6 +60,10 @@ class InMemoryDAO(ServerDAO):
                 self.MESSAGES_NAME: [],
                 self.LAST_DATE_TIME_NAME: datetime.min,
             }
+
+    def update_user_auth_time(self, username, date_time):
+        if username in self.users:
+            self.users[username][self.LAST_DATE_TIME_NAME] = date_time
 
     def get_user_pending_messages(self, username):
         if username in self.users:

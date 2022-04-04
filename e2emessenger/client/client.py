@@ -110,11 +110,15 @@ while True:
             peers[search] = public_key_contents
             dao.save_peers(peers)
     elif action == "pull" or action == "pull-messages":
-        print("Here are the messages you have received since your last pull:")
         messages = pull_messages()
-        for encrypted_message in messages:
-            decrypted_message = message.decrypt(keypair, encrypted_message)
-            print(decrypted_message)
+        if len(messages) > 0:
+            print("Here are the messages you have received since your last pull:")
+            for encrypted_message in messages:
+                decrypted_message = message.decrypt(keypair, encrypted_message)
+                print(decrypted_message)
+        else:
+            print("Looks like there is nothing new.")
+        print()
     elif action == "list" or action == "list-peers":
         print("Here are your current list of peers:")
         for peer in peers:

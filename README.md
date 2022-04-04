@@ -186,3 +186,29 @@ Then they generate the message hash and confirm it is identical to what was prov
 Finally, they decrypt the signature with the sender's public key and ensure the contents are identical to the hash.
 If they don't already have the sender's public key, they first retrieve it from the server.
 If any step fails, they discard the message.
+
+Upgrades
+--------
+
+Below are a list of features that would greatly improve security, but I don't have time to implement before this program is due.
+I will hopefully come back in the future and implement these.
+
+ * The server is set up with plain HTTP currently. It should allow for HTTPS.
+ * The server has a pretty simple backend, just in memory and file based. If I expect high traffic, I should implement a database backend.
+ * The client should have an option to use a password to secure their private key.
+ * The client should encypt all local data with their public key so no one can read the data.
+ * The client should have a way to export data, including private key, efficiently.
+ * A GUI client should be created.
+ * There currently could be problems with auth if a user changes time zones. This edge case should be dealt with.
+
+To Do
+-----
+
+ * Messages needs to do more than just encrypt basic message
+ * Messages also needs proper verification that the pulled message is valid
+ * The server needs to be able to save state to a file rather than just keep everything in memory
+ * Client needs to be cleaned up to include REST API separated from main
+ * Client needs to be cleaned up to include service layer separated from main
+ * I should clean up crypto module, probably making it all one import
+ * Client needs to actually store sent and received messages
+ * Client needs to be able to display conversations
