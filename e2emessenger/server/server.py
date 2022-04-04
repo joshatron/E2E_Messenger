@@ -10,10 +10,15 @@ class RegisterInfo(BaseModel):
     time: str
 
 
-class SendMessageInfo(BaseModel):
+class AuthInfo(BaseModel):
     username: str
-    date_time: str
+    time: str
     signature: str
+
+
+class SendMessageInfo(BaseModel):
+    auth: AuthInfo
+    recipient: str
     message: str
 
 
@@ -47,15 +52,18 @@ async def get_user_info(username: str, response: Response):
     return service.get_user_info(username)
 
 
-@app.put("/v1/user/{username}/message/send")
-async def send_message_to_user(username: str, send_message_info: SendMessageInfo):
-    return {"status": service.send_message_to_user(sender=send_message_info.username,
-                                                   recipient=username,
-                                                   date_time=send_message_info.date_time,
-                                                   signature=send_message_info.signature,
-                                                   message=send_message_info.message)}
+@app.put("/v1/user/{username}/message/send", status_code=204)
+async def send_message_to_user(username: str, send_message_info: SendMessageInfo, response: Response):
+    if username == send_message_info.auth.username and service.authenticate_user(send_message_info.auth):
+        service.send_message_to_user(
+            send_message_info.recipient, send_message_info.message)
+        return
+    else:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"status": "Invalid auth"}
 
 
-@app.get("/v1/user/{username}/message/read")
-async def read_messages(username: str, date_time: str, signature: str):
-    return service.read_messages(username=username, date_time=date_time, signature=signature)
+@app.post("/v1/user/{username}/message/pull")
+async def read_messages(username: str, auth: AuthInfo):
+    if username == auth.username and service.authenticate_user(auth):
+        return {"messages": service.read_messages(username)}

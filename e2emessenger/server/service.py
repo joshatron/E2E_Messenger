@@ -13,20 +13,13 @@ class ServerServices():
         user_info = self.dao.get_user_info(username)
         return {"username": user_info["username"], "public_key": user_info["public_key"]}
 
-    def send_message_to_user(self, sender, recipient, date_time, sig, message):
-        user_info = self.dao.get_user_info(sender)
-        if signature.check_signature(public_key=keys.import_public_key(user_info["public_key"]), signature=sig, username=sender, date_time=date_time):
-            self.dao.save_user_message(
-                sender=sender, recipient=recipient, date_time=date_time, signature=sig, contents=message)
-            return True
-        else:
-            return False
+    def authenticate_user(self, auth):
+        return True
 
-    def read_messages(self, username, date_time, sig):
-        user_info = self.dao.get_user_info(username)
-        if signature.check_signature(public_key=keys.import_public_key(user_info["public_key"]), signature=sig, username=username, date_time=date_time):
-            messages = self.dao.get_user_pending_messages(username=username)
-            self.dao.clear_user_pending_messages(username=username)
-            return messages
-        else:
-            return []
+    def send_message_to_user(self, recipient, message):
+        self.dao.save_user_message(recipient, message)
+
+    def read_messages(self, username):
+        messages = self.dao.get_user_pending_messages(username)
+        self.dao.clear_user_pending_messages(username=username)
+        return messages

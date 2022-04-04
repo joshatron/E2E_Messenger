@@ -93,7 +93,7 @@ Server response:
         Auth failure: 401 status code
         Bad input: 400 status code
 
-#### POST /v1/user/{username}/message/read
+#### POST /v1/user/{username}/message/pull
 
 At any time, a user can request all their unread messages.
 They authenticate with their digital signature.
@@ -102,11 +102,9 @@ Once they are downloaded, the messages are deleted from the server.
 Request body:
 
     {
-        "auth": {
-            "username": "[REQUESTER USERNAME]",
-            "time": "[CURRENT TIMESTAMP IN ISO FORMAT]",
-            "signature": "[BASE64 ENCODED SIGNATURE OF USERNAME AND TIMESTAMP]"
-        }
+        "username": "[REQUESTER USERNAME]",
+        "time": "[CURRENT TIMESTAMP IN ISO FORMAT]",
+        "signature": "[BASE64 ENCODED SIGNATURE OF USERNAME AND TIMESTAMP]"
     }
 
 Server response:

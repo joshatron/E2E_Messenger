@@ -20,21 +20,16 @@ class ServerDAO(ABC):
         pass
 
     @abstractmethod
-    def save_user_message(self, sender, recipient, date_time, signature, contents):
+    def save_user_message(self, recipient, message):
         pass
 
 
 class InMemoryDAO(ServerDAO):
-    public_key_name = "public_key"
-    username_name = "username"
-    last_date_time_name = "last_date_time"
+    PUBLIC_KEY_NAME = "public_key"
+    USERNAME_NAME = "username"
+    LAST_DATE_TIME_NAME = "last_date_time"
 
-    messages_name = "messages"
-    message_sender_name = "sender"
-    message_recipient_name = "recipient"
-    message_date_time_name = "date_time"
-    message_signature_name = "signature"
-    message_contents_name = "contents"
+    MESSAGES_NAME = "messages"
 
     def __init__(self):
         self.users = {}
@@ -44,10 +39,10 @@ class InMemoryDAO(ServerDAO):
             return False
         else:
             self.users[username] = {
-                self.username_name: username,
-                self.public_key_name: public_key,
-                self.messages_name: [],
-                self.last_date_time_name: datetime.fromisoformat(time),
+                self.USERNAME_NAME: username,
+                self.PUBLIC_KEY_NAME: public_key,
+                self.MESSAGES_NAME: [],
+                self.LAST_DATE_TIME_NAME: datetime.fromisoformat(time),
             }
             return True
 
@@ -56,30 +51,24 @@ class InMemoryDAO(ServerDAO):
             return self.users[username]
         else:
             return {
-                self.username_name: "",
-                self.public_key_name: "",
-                self.messages_name: [],
-                self.last_date_time_name: datetime.min,
+                self.USERNAME_NAME: "",
+                self.PUBLIC_KEY_NAME: "",
+                self.MESSAGES_NAME: [],
+                self.LAST_DATE_TIME_NAME: datetime.min,
             }
 
     def get_user_pending_messages(self, username):
         if username in self.users:
-            return self.users[username][self.messages_name]
+            return self.users[username][self.MESSAGES_NAME]
         else:
             return []
 
     def clear_user_pending_messages(self, username):
         if username in self.users:
-            self.users[username][self.messages_name] = []
+            self.users[username][self.MESSAGES_NAME] = []
+        print(self.users)
 
-    def save_user_message(self, sender, recipient, date_time, signature, contents):
-        message = {
-            self.message_sender_name: sender,
-            self.message_recipient_name: recipient,
-            self.message_date_time_name: date_time,
-            self.message_signature_name: signature,
-            self.message_contents_name: contents,
-        }
-
+    def save_user_message(self, recipient, message):
         if recipient in self.users:
-            self.users[recipient][self.messages_name].append(message)
+            self.users[recipient][self.MESSAGES_NAME].append(message)
+        print(self.users)

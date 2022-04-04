@@ -27,6 +27,43 @@ def find_user_public_key(to_search):
         return ""
 
 
+def send_message(to, message_contents):
+    current_date_time = signature.current_date_time()
+    auth = {
+        "username": username,
+        "time": current_date_time.isoformat(),
+        "signature": signature.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+    }
+    encrypted_message = message.encrypt(
+        keys.import_public_key(peers[to]), message_contents)
+
+    r = requests.put(server_url + "/v1/user/" + username + "/message/send", json={
+        "auth": auth,
+        "recipient": to,
+        "message": encrypted_message
+    })
+    if r.status_code == 204:
+        print("Message sent!")
+    else:
+        print("Oops, something went wrong sending that message.")
+
+
+def pull_messages():
+    current_date_time = signature.current_date_time()
+    auth = {
+        "username": username,
+        "time": current_date_time.isoformat(),
+        "signature": signature.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+    }
+    r = requests.post(server_url + "/v1/user/" + username +
+                      "/message/pull", json=auth)
+    if r.status_code == 200:
+        return r.json()["messages"]
+    else:
+        print("Oops, something went wrong pulling your messages.")
+        return []
+
+
 def initialize():
     (u, k) = dao.load_user_data()
 
@@ -61,7 +98,7 @@ peers = dao.load_peers()
 
 while True:
     action = input(
-        "What would you like to do? [find-user, pull-messages, list-users, view-conversation, send-message, exit]: ").strip().lower()
+        "What would you like to do? [find-user, pull-messages, list-peers, view-conversation, send-message, exit]: ").strip().lower()
 
     if action == "find" or action == "find-user":
         search = input("What user do you want to search for? ").strip()
@@ -72,9 +109,29 @@ while True:
             print("User found! Saving their public key for future use.")
             peers[search] = public_key_contents
             dao.save_peers(peers)
+    elif action == "pull" or action == "pull-messages":
+        print("Here are the messages you have received since your last pull:")
+        messages = pull_messages()
+        for encrypted_message in messages:
+            decrypted_message = message.decrypt(keypair, encrypted_message)
+            print(decrypted_message)
+    elif action == "list" or action == "list-peers":
+        print("Here are your current list of peers:")
+        for peer in peers:
+            print("\t" + peer)
+        print()
+    elif action == "view" or action == "view-conversation":
+        print("Sorry, this isn't implemented yet, check back later.")
+    elif action == "send" or action == "send-message":
+        to = input("Who would you like to send a message to? ")
+        if to not in peers:
+            print("You need to pick someone who is already a peer.")
+        else:
+            to_send = input("What would you like to say? ")
+            send_message(to, to_send)
     elif action == "exit":
         print("Have a good day.")
         break
     else:
         print(
-            "Action not recognized. Please choose from [find-user/find, pull-messages/pull, list-users/list, view-conversation/view, send-message/send, exit].")
+            "Action not recognized. Please choose from [find-user/find, pull-messages/pull, list-peers/list, view-conversation/view, send-message/send, exit].")
