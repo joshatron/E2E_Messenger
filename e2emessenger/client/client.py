@@ -1,8 +1,6 @@
-from .dao import FileBasedClientDAO
-from ..crypto import keys
-from ..crypto import signature
-from ..crypto import message
 import requests
+from .dao import FileBasedClientDAO
+from ..crypto import crypto
 
 dao = FileBasedClientDAO("client_data")
 server_url = "http://localhost:8000"
@@ -11,8 +9,8 @@ server_url = "http://localhost:8000"
 def try_register(proposed_username, pub_key):
     r = requests.put(server_url + "/v1/user/register", json={
                      "username": proposed_username,
-                     "public_key": keys.export_public_key(pub_key),
-                     "time": signature.current_date_time().isoformat()})
+                     "public_key": crypto.export_public_key(pub_key),
+                     "time": crypto.current_date_time().isoformat()})
     if r.status_code == 204:
         return True
     else:
@@ -28,14 +26,14 @@ def find_user_public_key(to_search):
 
 
 def send_message(to, message_contents):
-    current_date_time = signature.current_date_time()
+    current_date_time = crypto.current_date_time()
     auth = {
         "username": username,
         "time": current_date_time.isoformat(),
-        "signature": signature.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+        "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
-    encrypted_message = message.encrypt(
-        keys.import_public_key(peers[to]), message_contents)
+    encrypted_message = crypto.encrypt_message(
+        crypto.import_public_key(peers[to]), message_contents)
 
     r = requests.put(server_url + "/v1/user/" + username + "/message/send", json={
         "auth": auth,
@@ -49,7 +47,7 @@ def send_message(to, message_contents):
 
 
 def pull_messages():
-    current_date_time = signature.current_date_time()
+    current_date_time = crypto.current_date_time()
     auth = {
         "username": username,
         "time": current_date_time.isoformat(),
@@ -69,20 +67,20 @@ def initialize():
 
     if len(u) == 0:
         print("Looks like you don't have an account set up, let's get you registered!")
-        k = keys.generate_keypair()
+        k = crypto.generate_keypair()
         while True:
             proposed_username = input("What username do you want? ").strip()
             if try_register(proposed_username=proposed_username, pub_key=k.public_key()):
                 u = proposed_username
                 print("Username not taken, welcome " + u + "!")
                 dao.save_user_data(username=u,
-                                   keypair_contents=keys.export_keypair(k))
+                                   keypair_contents=crypto.export_keypair(k))
                 break
             else:
                 print(
                     "That username appears to be taken. You will need to pick a different one.")
     else:
-        k = keys.import_keypair(k)
+        k = crypto.import_keypair(k)
         print("Welcome back " + u + "!")
 
     return (u, k)
@@ -114,7 +112,7 @@ while True:
         if len(messages) > 0:
             print("Here are the messages you have received since your last pull:")
             for encrypted_message in messages:
-                decrypted_message = message.decrypt(keypair, encrypted_message)
+                decrypted_message = crypto.decrypt(keypair, encrypted_message)
                 print(decrypted_message)
         else:
             print("Looks like there is nothing new.")

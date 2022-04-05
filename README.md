@@ -209,6 +209,5 @@ To Do
  * The server needs to be able to save state to a file rather than just keep everything in memory
  * Client needs to be cleaned up to include REST API separated from main
  * Client needs to be cleaned up to include service layer separated from main
- * I should clean up crypto module, probably making it all one import
  * Client needs to actually store sent and received messages
  * Client needs to be able to display conversations

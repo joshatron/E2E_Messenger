@@ -64,6 +64,9 @@ async def send_message_to_user(username: str, send_message_info: SendMessageInfo
 
 
 @app.post("/v1/user/{username}/message/pull")
-async def read_messages(username: str, auth: AuthInfo):
+async def read_messages(username: str, auth: AuthInfo, response: Response):
     if username == auth.username and service.authenticate_user(auth):
         return {"messages": service.read_messages(username)}
+    else:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return {"status": "Invalid auth"}
