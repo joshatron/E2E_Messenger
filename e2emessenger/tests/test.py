@@ -102,6 +102,7 @@ class TestCryptoMethods(unittest.TestCase):
         self.assertNotEqual(message, ciphertext)
         decrypted = crypto.decrypt_message(
             receiver_private_key, sender_private_key.public_key(), ciphertext)
+        print(decrypted)
         self.assertIsInstance(decrypted, dict)
         self.assertEqual(sender, decrypted["sender"])
         self.assertEqual(receiver, decrypted["receiver"])
