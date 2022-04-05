@@ -104,9 +104,9 @@ class TestCryptoMethods(unittest.TestCase):
             receiver_private_key, sender_private_key.public_key(), ciphertext)
         print(decrypted)
         self.assertIsInstance(decrypted, dict)
-        self.assertEqual(sender, decrypted["sender"])
-        self.assertEqual(receiver, decrypted["receiver"])
-        self.assertEqual(time, decrypted["time"])
+        self.assertEqual(sender, decrypted["from"])
+        self.assertEqual(receiver, decrypted["to"])
+        self.assertEqual(time.isoformat(), decrypted["time"])
         self.assertEqual(message, decrypted["message"])
         self.assertGreater(len(decrypted["hash"]), 0)
         self.assertGreater(len(decrypted["signature"]), 0)
@@ -115,9 +115,9 @@ class TestCryptoMethods(unittest.TestCase):
             receiver_private_key, different_sender_private_key.public_key(), ciphertext)
         self.assertIsInstance(different_sender_private_key_decrypted, dict)
         self.assertEqual(
-            len(different_sender_private_key_decrypted["sender"]), 0)
+            len(different_sender_private_key_decrypted["from"]), 0)
         self.assertEqual(
-            len(different_sender_private_key_decrypted["receiver"]), 0)
+            len(different_sender_private_key_decrypted["to"]), 0)
         self.assertEqual(
             len(different_sender_private_key_decrypted["time"]), 0)
         self.assertEqual(

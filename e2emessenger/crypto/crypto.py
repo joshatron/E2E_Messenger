@@ -101,7 +101,6 @@ def encrypt_message(sender_private_key, receiver_public_key, sender, receiver, t
     contents = json.dumps({"from": sender, "to": receiver, "time": time.isoformat(
     ), "message": message, "hash": hash_contents, "signature": __sign_hashed(hash_contents, sender_private_key)})
     split_contents = [contents[i:i+100] for i in range(0, len(contents), 100)]
-    print(split_contents)
     final_encrypted = ""
     for part in split_contents:
         encrypted = base64.b64encode(receiver_public_key.encrypt(
@@ -113,21 +112,26 @@ def encrypt_message(sender_private_key, receiver_public_key, sender, receiver, t
 
 
 def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
-    decoded_ciphertext = base64.b64decode(ciphertext)
-    decrypted_message = receiver_private_key.decrypt(
-        decoded_ciphertext, __message_padding()).decode('utf-8')
-    return decrypted_message
+    parts = ciphertext.split('|')
+    final_decrypted_message = ""
+    for part in parts:
+        decoded_ciphertext = base64.b64decode(part)
+        decrypted_part = receiver_private_key.decrypt(
+            decoded_ciphertext, __message_padding()).decode('utf-8')
+        final_decrypted_message += decrypted_part
+    decrypted_object = json.loads(final_decrypted_message)
+    return decrypted_object
 
 
-sender_private_key = generate_keypair()
-receiver_private_key = generate_keypair()
-sender = 'Joshua'
-receiver = 'Vince'
-time = current_date_time()
-message = 'Hello world!'
-ciphertext = encrypt_message(
-    sender_private_key, receiver_private_key.public_key(), sender, receiver, time, message)
-print(ciphertext)
-decrypted = decrypt_message(
-    receiver_private_key, sender_private_key.public_key(), ciphertext)
-print(decrypted)
+# sender_private_key = generate_keypair()
+# receiver_private_key = generate_keypair()
+# sender = 'Joshua'
+# receiver = 'Vince'
+# time = current_date_time()
+# message = 'Hello world!'
+# ciphertext = encrypt_message(
+#     sender_private_key, receiver_private_key.public_key(), sender, receiver, time, message)
+# print("ciphertext: " + ciphertext)
+# decrypted = decrypt_message(
+#     receiver_private_key, sender_private_key.public_key(), ciphertext)
+# print(decrypted)
