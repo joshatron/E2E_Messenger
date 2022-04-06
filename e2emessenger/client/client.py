@@ -1,13 +1,13 @@
 from .dao import FileBasedClientDAO
 from .service import ClientServices
 
-dao = FileBasedClientDAO("client_data")
-service = ClientServices(dao)
-
 print("######################################")
 print("### End-to-End Encrypted Messenger ###")
 print("######################################")
 print()
+
+dao = FileBasedClientDAO("client_data")
+service = ClientServices(dao)
 
 while True:
     action = input(

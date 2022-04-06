@@ -1,3 +1,4 @@
+from getpass import getpass
 import requests
 from ..crypto import crypto
 
@@ -18,8 +19,11 @@ class ClientServices():
             keypair = crypto.generate_keypair()
             server_url = self.__query_server_url()
             username = self.__query_username(server_url, keypair)
+            password = self.__query_password()
+            self.dao.save_user_data(
+                server_url, username, crypto.export_keypair(keypair, password))
         else:
-            keypair = crypto.import_keypair(keypair)
+            keypair = self.__unlock_keypair(keypair)
             print("Welcome back " + username + "!")
 
         return (server_url, username, keypair)
@@ -46,8 +50,6 @@ class ClientServices():
             proposed_username = input("What username do you want? ").strip()
             if self.__try_register(server_url, proposed_username, keypair.public_key()):
                 print("Username not taken, welcome " + proposed_username + "!")
-                self.dao.save_user_data(
-                    server_url, proposed_username, crypto.export_keypair(keypair))
                 return proposed_username
             else:
                 print(
@@ -62,6 +64,18 @@ class ClientServices():
             return True
         else:
             return False
+
+    def __query_password(self):
+        return getpass()
+
+    def __unlock_keypair(self, keypair):
+        while True:
+            password = self.__query_password()
+            decrypted_keypair = crypto.import_keypair(keypair, password)
+            if decrypted_keypair is not None:
+                return keypair
+            else:
+                print("Incorrect password, try again.")
 
     def find_user(self):
         search = input("What user do you want to search for? ").strip()

@@ -196,7 +196,6 @@ I will hopefully come back in the future and implement these.
 
  * The server is set up with plain HTTP currently. It should allow for HTTPS.
  * The server has a pretty simple backend, just in memory and file based. If I expect high traffic, I should implement a database backend.
- * The client should have an option to use a password to secure their private key.
  * The client should encypt all local data with their public key so no one can read the data.
  * The client should have a way to export data, including private key, efficiently.
  * A GUI client should be created.

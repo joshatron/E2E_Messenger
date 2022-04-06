@@ -13,14 +13,17 @@ def generate_keypair():
     return rsa.generate_private_key(public_exponent=65537, key_size=2048)
 
 
-def export_keypair(private_key):
+def export_keypair(private_key, password):
     return private_key.private_bytes(encoding=serialization.Encoding.PEM,
                                      format=serialization.PrivateFormat.TraditionalOpenSSL,
-                                     encryption_algorithm=serialization.NoEncryption()).decode('utf-8')
+                                     encryption_algorithm=serialization.BestAvailableEncryption(password.encode('utf-8'))).decode('utf-8')
 
 
-def import_keypair(keypair_contents):
-    return serialization.load_pem_private_key(keypair_contents.encode('utf-8'), password=None)
+def import_keypair(keypair_contents, password):
+    try:
+        return serialization.load_pem_private_key(keypair_contents.encode('utf-8'), password=password.encode('utf-8'))
+    except Exception:
+        return None
 
 
 def export_public_key(public_key):

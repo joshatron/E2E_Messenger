@@ -15,7 +15,7 @@ class TestCryptoMethods(unittest.TestCase):
 
     def test_export_keypair(self):
         private_key = crypto.generate_keypair()
-        keypair_contents = crypto.export_keypair(private_key)
+        keypair_contents = crypto.export_keypair(private_key, "pass")
         self.assertIsInstance(keypair_contents, str)
         self.assertTrue(keypair_contents.startswith(
             '-----BEGIN RSA PRIVATE KEY-----'))
@@ -24,13 +24,13 @@ class TestCryptoMethods(unittest.TestCase):
 
     def test_import_keypair(self):
         private_key = crypto.generate_keypair()
-        original_keypair_contents = crypto.export_keypair(
-            private_key=private_key)
+        original_keypair_contents = crypto.export_keypair(private_key, "pass")
         new_private_key = crypto.import_keypair(
-            keypair_contents=original_keypair_contents)
+            original_keypair_contents, "pass")
         self.assertIsInstance(new_private_key, rsa.RSAPrivateKey)
-        self.assertEqual(crypto.export_keypair(
-            new_private_key), original_keypair_contents)
+        wrong_pass_private_key = crypto.import_keypair(
+            original_keypair_contents, "p")
+        self.assertEqual(wrong_pass_private_key, None)
 
     def test_export_public_key(self):
         private_key = crypto.generate_keypair()
