@@ -64,29 +64,28 @@ class TestCryptoMethods(unittest.TestCase):
         username = 'Joshua'
         date_time = crypto.current_date_time()
         private_key = crypto.generate_keypair()
-        s = crypto.generate_signature(
-            private_key=private_key, username=username, date_time=date_time)
+        s = crypto.generate_auth_signature(private_key, username, date_time)
         self.assertIsInstance(s, str)
         self.assertGreater(len(s), 0)
-        self.assertTrue(crypto.check_signature(public_key=private_key.public_key(),
-                                               signature=s,
-                                               username=username,
-                                               date_time=date_time))
+        self.assertTrue(crypto.verify_auth_signature(public_key=private_key.public_key(),
+                                                     signature=s,
+                                                     username=username,
+                                                     date_time=date_time))
         different_username = 'Josh'
-        self.assertFalse(crypto.check_signature(public_key=private_key.public_key(),
-                                                signature=s,
-                                                username=different_username,
-                                                date_time=date_time))
+        self.assertFalse(crypto.verify_auth_signature(public_key=private_key.public_key(),
+                                                      signature=s,
+                                                      username=different_username,
+                                                      date_time=date_time))
         different_date_time = crypto.current_date_time()
-        self.assertFalse(crypto.check_signature(public_key=private_key.public_key(),
-                                                signature=s,
-                                                username=username,
-                                                date_time=different_date_time))
+        self.assertFalse(crypto.verify_auth_signature(public_key=private_key.public_key(),
+                                                      signature=s,
+                                                      username=username,
+                                                      date_time=different_date_time))
         different_private_key = crypto.generate_keypair()
-        self.assertFalse(crypto.check_signature(public_key=different_private_key.public_key(),
-                                                signature=s,
-                                                username=username,
-                                                date_time=date_time))
+        self.assertFalse(crypto.verify_auth_signature(public_key=different_private_key.public_key(),
+                                                      signature=s,
+                                                      username=username,
+                                                      date_time=date_time))
 
     def test_encrypt_and_decrypt(self):
         sender_private_key = crypto.generate_keypair()
