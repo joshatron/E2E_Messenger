@@ -101,8 +101,7 @@ class TestCryptoMethods(unittest.TestCase):
         self.assertGreater(len(ciphertext), 0)
         self.assertNotEqual(message, ciphertext)
         decrypted = crypto.decrypt_message(
-            receiver_private_key, sender_private_key.public_key(), ciphertext)
-        print(decrypted)
+            receiver_private_key, {sender: sender_private_key.public_key()}, ciphertext)
         self.assertIsInstance(decrypted, dict)
         self.assertEqual(sender, decrypted["from"])
         self.assertEqual(receiver, decrypted["to"])
@@ -112,7 +111,7 @@ class TestCryptoMethods(unittest.TestCase):
         self.assertGreater(len(decrypted["signature"]), 0)
         different_sender_private_key = crypto.generate_keypair()
         different_sender_private_key_decrypted = crypto.decrypt_message(
-            receiver_private_key, different_sender_private_key.public_key(), ciphertext)
+            receiver_private_key, {sender: different_sender_private_key.public_key()}, ciphertext)
         self.assertIsInstance(different_sender_private_key_decrypted, dict)
         self.assertEqual(
             len(different_sender_private_key_decrypted["from"]), 0)

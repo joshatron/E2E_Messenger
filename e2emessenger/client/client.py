@@ -3,7 +3,7 @@ from .dao import FileBasedClientDAO
 from ..crypto import crypto
 
 dao = FileBasedClientDAO("client_data")
-server_url = "http://localhost:8000"
+server_url = "http://e2e.joshatron.io:8000"
 
 
 def try_register(proposed_username, pub_key):
@@ -32,8 +32,7 @@ def send_message(to, message_contents):
         "time": current_date_time.isoformat(),
         "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
-    encrypted_message = crypto.encrypt_message(
-        crypto.import_public_key(peers[to]), message_contents)
+    encrypted_message = crypto.encrypt_message(peers[to], message_contents)
 
     r = requests.put(server_url + "/v1/user/" + username + "/message/send", json={
         "auth": auth,
@@ -51,7 +50,7 @@ def pull_messages():
     auth = {
         "username": username,
         "time": current_date_time.isoformat(),
-        "signature": signature.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+        "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
     r = requests.post(server_url + "/v1/user/" + username +
                       "/message/pull", json=auth)
@@ -93,6 +92,7 @@ print()
 
 (username, keypair) = initialize()
 peers = dao.load_peers()
+conversations = {}
 
 while True:
     action = input(
@@ -105,7 +105,7 @@ while True:
             print("That user does not appear to exist.")
         else:
             print("User found! Saving their public key for future use.")
-            peers[search] = public_key_contents
+            peers[search] = crypto.import_public_key(public_key_contents)
             dao.save_peers(peers)
     elif action == "pull" or action == "pull-messages":
         messages = pull_messages()
@@ -113,7 +113,17 @@ while True:
             print("Here are the messages you have received since your last pull:")
             for encrypted_message in messages:
                 decrypted_message = crypto.decrypt(keypair, encrypted_message)
-                print(decrypted_message)
+                if len(decrypted_message["from"]) == 0:
+                    print("Illegal message found, ignoring")
+                else:
+                    conversation_contents = {
+                        "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
+                    if decrypted_message["from"] in conversations:
+                        conversations[decrypted_message["from"]].append(
+                            conversation_contents)
+                    else:
+                        conversations[decrypted_message["from"]] = [
+                            conversation_contents]
         else:
             print("Looks like there is nothing new.")
         print()
@@ -123,7 +133,15 @@ while True:
             print("\t" + peer)
         print()
     elif action == "view" or action == "view-conversation":
-        print("Sorry, this isn't implemented yet, check back later.")
+        other = input("Which conversation do you want to view? ")
+        if other in conversations:
+            for message in conversations[other]:
+                if message["sent"]:
+                    print("OUT " + message["time"] + ": " + message["message"])
+                else:
+                    print("IN " + message["time"] + ": " + message["message"])
+        else:
+            print("You don't appear to have any conversations with that user.")
     elif action == "send" or action == "send-message":
         to = input("Who would you like to send a message to? ")
         if to not in peers:
@@ -131,6 +149,12 @@ while True:
         else:
             to_send = input("What would you like to say? ")
             send_message(to, to_send)
+            conversation_contents = {
+                "sent": True, "time": decrypted_message["time"], "message": decrypted_message["message"]}
+            if to_send in conversations:
+                conversations[to_send].append(conversation_contents)
+            else:
+                conversations[to_send] = [conversation_contents]
     elif action == "exit":
         print("Have a good day.")
         break

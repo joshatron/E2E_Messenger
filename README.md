@@ -204,8 +204,6 @@ I will hopefully come back in the future and implement these.
 To Do
 -----
 
- * Messages needs to do more than just encrypt basic message
- * Messages also needs proper verification that the pulled message is valid
  * Client needs to actually store sent and received messages
  * Client needs to be able to display conversations
  * The server needs to be able to save state to a file rather than just keep everything in memory

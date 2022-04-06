@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from ..crypto import crypto
 
 
 class ClientDAO(ABC):
@@ -54,13 +55,13 @@ class FileBasedClientDAO(ClientDAO):
     def save_peers(self, peers):
         for peer in peers:
             with open(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME, peer), "w+", encoding="utf-8") as peer_file:
-                peer_file.write(peers[peer])
+                peer_file.write(crypto.export_public_key(peers[peer]))
 
     def load_peers(self):
         peers = {}
 
         for peer in os.listdir(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME)):
             with open(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME, peer), "r", encoding="utf-8") as peer_file:
-                peers[peer] = peer_file.read()
+                peers[peer] = crypto.import_public_key(peer_file.read())
 
         return peers

@@ -82,6 +82,10 @@ def __message_padding():
     )
 
 
+def __generate_hash_value_for_message(sender, receiver, time, message):
+    return sender + " " + receiver + " " + time.isoformat() + " " + message
+
+
 def __hash_string(str):
     hash = hashes.Hash(hashes.SHA256())
     hash.update(str.encode('utf-8'))
@@ -95,9 +99,22 @@ def __sign_hashed(hash, private_key):
     return base64.b64encode(signature).decode('utf-8')
 
 
+def __verify_signed_hashed(hash, signature, public_key):
+    try:
+        decoded_hash = base64.b64decode(hash)
+        decoded_signature = base64.b64decode(signature)
+        public_key.verify(decoded_signature,
+                          decoded_hash,
+                          __signature_padding(),
+                          utils.Prehashed(__signature_hash()))
+        return True
+    except InvalidSignature:
+        return False
+
+
 def encrypt_message(sender_private_key, receiver_public_key, sender, receiver, time, message):
     hash_contents = __hash_string(
-        sender + " " + receiver + " " + time.isoformat() + " " + message)
+        __generate_hash_value_for_message(sender, receiver, time, message))
     contents = json.dumps({"from": sender, "to": receiver, "time": time.isoformat(
     ), "message": message, "hash": hash_contents, "signature": __sign_hashed(hash_contents, sender_private_key)})
     split_contents = [contents[i:i+100] for i in range(0, len(contents), 100)]
@@ -120,18 +137,10 @@ def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
             decoded_ciphertext, __message_padding()).decode('utf-8')
         final_decrypted_message += decrypted_part
     decrypted_object = json.loads(final_decrypted_message)
-    return decrypted_object
+    calculated_hash = __hash_string(
+        __generate_hash_value_for_message(decrypted_object["from"], decrypted_object["to"], datetime.fromisoformat(decrypted_object["time"]), decrypted_object["message"]))
 
-
-# sender_private_key = generate_keypair()
-# receiver_private_key = generate_keypair()
-# sender = 'Joshua'
-# receiver = 'Vince'
-# time = current_date_time()
-# message = 'Hello world!'
-# ciphertext = encrypt_message(
-#     sender_private_key, receiver_private_key.public_key(), sender, receiver, time, message)
-# print("ciphertext: " + ciphertext)
-# decrypted = decrypt_message(
-#     receiver_private_key, sender_private_key.public_key(), ciphertext)
-# print(decrypted)
+    if decrypted_object['from'] in peer_public_keys and calculated_hash == decrypted_object["hash"] and __verify_signed_hashed(decrypted_object["hash"], decrypted_object["signature"], peer_public_keys[decrypted_object["from"]]):
+        return decrypted_object
+    else:
+        return {"to": "", "from": "", "time": "", "message": "", "hash": "", "signature": ""}
