@@ -1,4 +1,5 @@
 import os
+import json
 from abc import ABC, abstractmethod
 from ..crypto import crypto
 
@@ -25,12 +26,15 @@ class FileBasedClientDAO(ClientDAO):
     KEY_FILE_NAME = "key.private"
     USERNAME_FILE_NAME = "username.txt"
     PEER_KEY_FOLDER_NAME = "peers"
+    CONVERSATION_KEY_FOLDER_NAME = "conversations"
 
     def __init__(self, base_dir):
         self.base_dir = base_dir
         try:
             os.mkdir(self.base_dir)
             os.mkdir(os.path.join(self.base_dir, self.PEER_KEY_FOLDER_NAME))
+            os.mkdir(os.path.join(self.base_dir,
+                     self.CONVERSATION_KEY_FOLDER_NAME))
         except FileExistsError:
             pass
 
@@ -65,3 +69,19 @@ class FileBasedClientDAO(ClientDAO):
                 peers[peer] = crypto.import_public_key(peer_file.read())
 
         return peers
+
+    def save_conversations(self, conversations):
+        for conversation in conversations:
+            with open(os.path.join(self.base_dir, self.CONVERSATION_KEY_FOLDER_NAME, conversation), "w+", encoding="utf-8") as conversation_file:
+                conversation_file.write(
+                    json.dumps(conversations[conversation]))
+
+    def load_conversations(self):
+        conversations = {}
+
+        for conversation in os.listdir(os.path.join(self.base_dir, self.CONVERSATION_KEY_FOLDER_NAME)):
+            with open(os.path.join(self.base_dir, self.CONVERSATION_KEY_FOLDER_NAME, conversation), "r", encoding="utf-8") as conversation_file:
+                conversations[conversation] = json.loads(
+                    conversation_file.read())
+
+        return conversations

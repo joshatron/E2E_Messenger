@@ -93,7 +93,7 @@ print()
 
 (username, keypair) = initialize()
 peers = dao.load_peers()
-conversations = {}
+conversations = dao.load_conversations()
 
 while True:
     action = input(
@@ -111,20 +111,21 @@ while True:
     elif action == "pull" or action == "pull-messages":
         messages = pull_messages()
         if len(messages) > 0:
-            print("Here are the messages you have received since your last pull:")
             for encrypted_message in messages:
-                decrypted_message = crypto.decrypt(keypair, encrypted_message)
+                decrypted_message = crypto.decrypt_message(
+                    keypair, peers, encrypted_message)
                 if len(decrypted_message["from"]) == 0:
                     print("Illegal message found, ignoring")
                 else:
                     conversation_contents = {
-                        "sent": False, "time": decrypted_message["time"].isoformat(), "message": decrypted_message["message"]}
+                        "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
                     if decrypted_message["from"] in conversations:
                         conversations[decrypted_message["from"]].append(
                             conversation_contents)
                     else:
                         conversations[decrypted_message["from"]] = [
                             conversation_contents]
+            dao.save_conversations(conversations)
         else:
             print("Looks like there is nothing new.")
         print()
@@ -156,6 +157,7 @@ while True:
                 conversations[to].append(conversation_contents)
             else:
                 conversations[to] = [conversation_contents]
+            dao.save_conversations(conversations)
     elif action == "exit":
         print("Have a good day.")
         break
