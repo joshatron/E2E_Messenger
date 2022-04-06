@@ -3,13 +3,18 @@ from .dao import FileBasedClientDAO
 from ..crypto import crypto
 
 dao = FileBasedClientDAO("client_data")
-server_url = "http://e2e.joshatron.io:8000"
 
 
-def try_register(proposed_username, pub_key):
+def try_ping(proposed_server_url):
+    r = requests.get(proposed_server_url + "/v1/health")
+    print(r)
+    return r.status_code == 200
+
+
+def try_register(server_url, proposed_username, pub_key):
     r = requests.put(server_url + "/v1/user/register", json={
-                     "username": proposed_username,
-                     "public_key": crypto.export_public_key(pub_key),
+        "username": proposed_username,
+        "public_key": crypto.export_public_key(pub_key),
                      "time": crypto.current_date_time().isoformat()})
     if r.status_code == 204:
         return True
@@ -63,18 +68,26 @@ def pull_messages():
 
 
 def initialize():
-    (u, k) = dao.load_user_data()
+    (s, u, k) = dao.load_user_data()
 
     if len(u) == 0:
         print("Looks like you don't have an account set up, let's get you registered!")
         k = crypto.generate_keypair()
         while True:
+            proposed_server_url = input(
+                "Where is the server you want to connect to? ").strip()
+            if try_ping(proposed_server_url):
+                s = proposed_server_url
+                print("Server found!")
+                break
+            else:
+                print("That server address doesn't appear to be correct.")
+        while True:
             proposed_username = input("What username do you want? ").strip()
-            if try_register(proposed_username=proposed_username, pub_key=k.public_key()):
+            if try_register(s, proposed_username, k.public_key()):
                 u = proposed_username
                 print("Username not taken, welcome " + u + "!")
-                dao.save_user_data(username=u,
-                                   keypair_contents=crypto.export_keypair(k))
+                dao.save_user_data(s, u, crypto.export_keypair(k))
                 break
             else:
                 print(
@@ -83,7 +96,7 @@ def initialize():
         k = crypto.import_keypair(k)
         print("Welcome back " + u + "!")
 
-    return (u, k)
+    return (s, u, k)
 
 
 print("######################################")
@@ -91,7 +104,7 @@ print("### End-to-End Encrypted Messenger ###")
 print("######################################")
 print()
 
-(username, keypair) = initialize()
+(server_url, username, keypair) = initialize()
 peers = dao.load_peers()
 conversations = dao.load_conversations()
 

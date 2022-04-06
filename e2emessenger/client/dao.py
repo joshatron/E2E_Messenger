@@ -24,6 +24,7 @@ class ClientDAO(ABC):
 
 class FileBasedClientDAO(ClientDAO):
     KEY_FILE_NAME = "key.private"
+    SERVER_FILE_NAME = "server.txt"
     USERNAME_FILE_NAME = "username.txt"
     PEER_KEY_FOLDER_NAME = "peers"
     CONVERSATION_KEY_FOLDER_NAME = "conversations"
@@ -38,23 +39,28 @@ class FileBasedClientDAO(ClientDAO):
         except FileExistsError:
             pass
 
-    def save_user_data(self, username, keypair_contents):
+    def save_user_data(self, server_url, username, keypair_contents):
+        with open(os.path.join(self.base_dir, self.SERVER_FILE_NAME), "w+", encoding="utf-8") as server_file:
+            server_file.write(server_url)
         with open(os.path.join(self.base_dir, self.USERNAME_FILE_NAME), "w+", encoding="utf-8") as username_file:
             username_file.write(username)
         with open(os.path.join(self.base_dir, self.KEY_FILE_NAME), "w+", encoding="utf-8") as key_file:
             key_file.write(keypair_contents)
 
     def load_user_data(self):
+        server_url = ""
         username = ""
         keypair_contents = ""
         try:
+            with open(os.path.join(self.base_dir, self.SERVER_FILE_NAME), "r", encoding="utf-8") as server_file:
+                server_url = server_file.read()
             with open(os.path.join(self.base_dir, self.USERNAME_FILE_NAME), "r", encoding="utf-8") as username_file:
                 username = username_file.read()
             with open(os.path.join(self.base_dir, self.KEY_FILE_NAME), "r", encoding="utf-8") as key_file:
                 keypair_contents = key_file.read()
-            return (username, keypair_contents)
+            return (server_url, username, keypair_contents)
         except IOError:
-            return ('', '')
+            return ('', '', '')
 
     def save_peers(self, peers):
         for peer in peers:

@@ -28,9 +28,9 @@ service = ServerServices(dao)
 app = FastAPI()
 
 
-@app.get("/")
+@app.get("/v1/health")
 async def root():
-    return {"message": "Hello world!"}
+    return {"healthy": True}
 
 
 @app.put("/v1/user/register", status_code=204)
