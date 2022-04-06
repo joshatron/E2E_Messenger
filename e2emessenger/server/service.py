@@ -16,7 +16,7 @@ class ServerServices():
     def authenticate_user(self, auth):
         request_time = datetime.fromisoformat(auth.time)
         user_info = self.dao.get_user_info(auth.username)
-        if auth.username == user_info['username'] and request_time > user_info['last_date_time'] and crypto.check_signature(
+        if auth.username == user_info['username'] and request_time > user_info['last_date_time'] and crypto.verify_auth_signature(
                 crypto.import_public_key(user_info['public_key']), auth.signature, auth.username, request_time):
             self.dao.update_user_auth_time(auth.username, request_time)
             return True

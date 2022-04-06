@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Response, status
 from pydantic import BaseModel
 from .service import ServerServices
-from .dao import InMemoryDAO
+from .dao import FileBasedServerDAO
 
 
 class RegisterInfo(BaseModel):
@@ -22,7 +22,7 @@ class SendMessageInfo(BaseModel):
     message: str
 
 
-dao = InMemoryDAO()
+dao = FileBasedServerDAO()
 service = ServerServices(dao)
 
 app = FastAPI()

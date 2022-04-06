@@ -30,7 +30,7 @@ def send_message(to, message_contents):
     auth = {
         "username": username,
         "time": current_date_time.isoformat(),
-        "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+        "signature": crypto.generate_auth_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
     encrypted_message = crypto.encrypt_message(
         keypair, peers[to], username, to, crypto.current_date_time(), message_contents)
@@ -51,7 +51,7 @@ def pull_messages():
     auth = {
         "username": username,
         "time": current_date_time.isoformat(),
-        "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
+        "signature": crypto.generate_auth_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
     r = requests.post(server_url + "/v1/user/" + username +
                       "/message/pull", json=auth)

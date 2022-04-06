@@ -204,5 +204,4 @@ I will hopefully come back in the future and implement these.
 To Do
 -----
 
- * The server needs to be able to save state to a file rather than just keep everything in memory
  * All the code needs to be cleaned up a lot
