@@ -200,8 +200,3 @@ I will hopefully come back in the future and implement these.
  * The client should have a way to export data, including private key, efficiently.
  * A GUI client should be created.
  * There currently could be problems with auth if a user changes time zones. This edge case should be dealt with.
-
-To Do
------
-
- * All the code needs to be cleaned up a lot
