@@ -178,6 +178,7 @@ This is made in a JSON format:
 The contents to hash for [HASH OF MESSAGE] are from + " " + to + " " + time + " " + message and it uses the SHA256 hash.
 The signature is a signature with the sender's private key using the hash as the message.
 This JSON object is then encrypted with the recipient's public key and sent to the other user to the server.
+Because of the limits for message length of RSA, if the JSON object is longer than 100 characters, it is split into 100 character chunks to be encrypted.
 This scheme will ensure confidentiality, integrity, and non-repudiation.
 
 When the recipient recieves the message, they start by decrypting it with their private key.
