@@ -32,7 +32,8 @@ def send_message(to, message_contents):
         "time": current_date_time.isoformat(),
         "signature": crypto.generate_signature(private_key=keypair, username=username, date_time=current_date_time)
     }
-    encrypted_message = crypto.encrypt_message(peers[to], message_contents)
+    encrypted_message = crypto.encrypt_message(
+        keypair, peers[to], username, to, crypto.current_date_time(), message_contents)
 
     r = requests.put(server_url + "/v1/user/" + username + "/message/send", json={
         "auth": auth,
@@ -117,7 +118,7 @@ while True:
                     print("Illegal message found, ignoring")
                 else:
                     conversation_contents = {
-                        "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
+                        "sent": False, "time": decrypted_message["time"].isoformat(), "message": decrypted_message["message"]}
                     if decrypted_message["from"] in conversations:
                         conversations[decrypted_message["from"]].append(
                             conversation_contents)
@@ -150,11 +151,11 @@ while True:
             to_send = input("What would you like to say? ")
             send_message(to, to_send)
             conversation_contents = {
-                "sent": True, "time": decrypted_message["time"], "message": decrypted_message["message"]}
-            if to_send in conversations:
-                conversations[to_send].append(conversation_contents)
+                "sent": True, "time": crypto.current_date_time().isoformat(), "message": to_send}
+            if to in conversations:
+                conversations[to].append(conversation_contents)
             else:
-                conversations[to_send] = [conversation_contents]
+                conversations[to] = [conversation_contents]
     elif action == "exit":
         print("Have a good day.")
         break
