@@ -6,6 +6,8 @@ from cryptography.hazmat.primitives import serialization, hashes
 from cryptography.exceptions import InvalidSignature
 
 
+DETAILED_OUTPUT = True
+
 # Keys
 
 
@@ -97,6 +99,8 @@ def encrypt_message(sender_private_key, receiver_public_key, sender, receiver, t
     signature_contents = __sign_hashed(hash_contents, sender_private_key)
     final_contents = __generate_final_message_string(
         sender, receiver, time, message, hash_contents, signature_contents)
+    if DETAILED_OUTPUT:
+        print("Sending message with following contents: " + final_contents)
     return __encrypt_long_message(receiver_public_key, final_contents)
 
 
@@ -129,11 +133,13 @@ def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
     decrypted_message = __decrypt_long_message(
         receiver_private_key, ciphertext)
     decrypted_object = json.loads(decrypted_message)
+    if DETAILED_OUTPUT:
+        print("Decrypted message into: " + decrypted_message)
 
     if __verify_decrypted_message(decrypted_object, peer_public_keys):
         return decrypted_object
     else:
-        return {"to": "", "from": "", "time": "", "message": "", "hash": "", "signature": ""}
+        return {"to": "", "from": decrypted_object["from"], "time": "", "message": "", "hash": "", "signature": ""}
 
 
 def __decrypt_long_message(private_key, message):
@@ -152,10 +158,26 @@ def __split_encrypted_into_parts(encrypted_message):
 
 
 def __verify_decrypted_message(decrypted_object, peer_public_keys):
+    if DETAILED_OUTPUT:
+        print("Verifying integrity of message.")
     calculated_hash = __hash_string(
         __generate_message_string_to_sign(decrypted_object["from"], decrypted_object["to"], datetime.fromisoformat(decrypted_object["time"]), decrypted_object["message"]))
 
-    if decrypted_object['from'] in peer_public_keys and calculated_hash == decrypted_object["hash"] and __verify_signed_hash(decrypted_object["hash"], decrypted_object["signature"], peer_public_keys[decrypted_object["from"]]):
+    if decrypted_object["from"] not in peer_public_keys:
+        print("Peer public key not found.")
+        return False
+
+    if DETAILED_OUTPUT:
+        print("Given hash:      " + decrypted_object["hash"])
+        print("Calculated hash: " + calculated_hash)
+
+    if calculated_hash != decrypted_object["hash"]:
+        return False
+
+    if __verify_signed_hash(decrypted_object["hash"], decrypted_object["signature"], peer_public_keys[decrypted_object["from"]]):
+        if DETAILED_OUTPUT:
+            print("Verified signature '" +
+                  decrypted_object["signature"] + "' is from " + decrypted_object["from"] + " for these message contents")
         return True
     else:
         return False

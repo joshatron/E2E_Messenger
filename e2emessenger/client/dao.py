@@ -6,7 +6,7 @@ from ..crypto import crypto
 
 class ClientDAO(ABC):
     @abstractmethod
-    def save_user_data(self, username, keypair_contents):
+    def save_user_data(self, server_url, username, keypair_contents):
         pass
 
     @abstractmethod

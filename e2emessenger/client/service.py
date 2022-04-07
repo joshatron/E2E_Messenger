@@ -107,8 +107,22 @@ class ClientServices():
             for encrypted_message in messages:
                 decrypted_message = crypto.decrypt_message(
                     self.keypair, self.peers, encrypted_message)
-                if len(decrypted_message["from"]) == 0:
-                    print("Illegal message found, ignoring")
+                if len(decrypted_message["to"]) == 0:
+                    if decrypted_message["from"] not in self.peers:
+                        print(
+                            "Received message from user not in peer list, trying to obtain their public key...")
+                        public_key = self.__find_user_public_key(
+                            decrypted_message["from"])
+                        if len(public_key) > 0:
+                            self.peers[decrypted_message["from"]
+                                       ] = crypto.import_public_key(public_key)
+                            self.dao.save_peers(self.peers)
+                            decrypted_message = crypto.decrypt_message(
+                                self.keypair, self.peers, encrypted_message)
+                        else:
+                            print("Illegal message found, ignoring")
+                    else:
+                        print("Illegal message found, ignoring")
                 else:
                     conversation_contents = {
                         "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
