@@ -73,7 +73,7 @@ class ClientServices():
             password = self.__query_password()
             decrypted_keypair = crypto.import_keypair(keypair, password)
             if decrypted_keypair is not None:
-                return keypair
+                return decrypted_keypair
             else:
                 print("Incorrect password, try again.")
 
@@ -154,7 +154,7 @@ class ClientServices():
         return {
             "username": self.username,
             "time": current_date_time.isoformat(),
-            "signature": crypto.generate_auth_signature(private_key=self.keypair, username=self.username, date_time=current_date_time)
+            "signature": crypto.generate_auth_signature(self.keypair, self.username, current_date_time)
         }
 
     def view_conversation(self):
