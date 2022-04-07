@@ -26,7 +26,9 @@ Server
 ------
 
 The server will be very simple.
+It uses a simple file in JSON format for storage, located at server_data/server_data.json, keeping everything in memory while it is running.
 Below are all of the endpoints on it.
+
 
 #### POST /v1/user/register
 
@@ -124,7 +126,7 @@ Server response:
 Client
 ------
 
-The client will be a simple interactive command line application.
+The client is a simple interactive command line application.
 The first time it is run, it requests a username, generates a public/private key pair, and registers with the server.
 
 To connect with other users, you request the server for their public key using their username.
@@ -134,6 +136,13 @@ When you want to send a message, simply specify a recipient from your contact bo
 
 You can also at any time pull down your latest messages.
 Then you can view your conversations.
+
+All data is stored in the client_data folder.
+The private key is stored in key.private.
+The server URL is stored in server.txt.
+Your username is stored in username.txt.
+All peer public keys are stored in the peers folder, with the name of the file being the username of the person.
+Similarly, conversations are stored in the conversations folder, with the name of the file being the user the conversation is with.
 
 Cryptography
 ------------
@@ -191,11 +200,12 @@ If any step fails, they discard the message.
 Upgrades
 --------
 
-Below are a list of features that would greatly improve security, but I don't have time to implement before this program is due.
+Below are a list of features that would be good to add, but I don't have time to implement before this program is due.
 I will hopefully come back in the future and implement these.
 
+ * The server should have a private key, and the client should send their auth encrypted with the server's public key.
  * The server is set up with plain HTTP currently. It should allow for HTTPS.
- * The server has a pretty simple backend, just in memory and file based. If I expect high traffic, I should implement a database backend.
+ * The server has a pretty simple backend, just in memory and file based. If it needs to be able to scale more, I should implement a database backend.
  * The client should encypt all local data with their public key so no one can read the data.
  * The client should have a way to export data, including private key, efficiently.
  * A GUI client should be created.
