@@ -79,14 +79,20 @@ class ClientServices():
 
     def find_user(self):
         search = input("What user do you want to search for? ").strip()
-        public_key_contents = self.__find_user_public_key(search)
-        if len(public_key_contents) == 0:
-            print("That user does not appear to exist.")
-        else:
+        if self.__try_adding_user_public_key(search):
             print("User found! Saving their public key for future use.")
-            print()
-            self.peers[search] = crypto.import_public_key(public_key_contents)
+        else:
+            print("That user does not appear to exist.")
+        print()
+
+    def __try_adding_user_public_key(self, username):
+        public_key = self.__find_user_public_key(username)
+        if len(public_key) > 0:
+            self.peers[username] = crypto.import_public_key(public_key)
             self.dao.save_peers(self.peers)
+            return True
+        else:
+            return False
 
     def __find_user_public_key(self, to_search):
         r = requests.get(self.server_url + "/v1/user/" + to_search)
@@ -105,35 +111,7 @@ class ClientServices():
         messages = self.__pull_messages_from_server()
         if len(messages) > 0:
             for encrypted_message in messages:
-                decrypted_message = crypto.decrypt_message(
-                    self.keypair, self.peers, encrypted_message)
-                if len(decrypted_message["to"]) == 0:
-                    if decrypted_message["from"] not in self.peers:
-                        print(
-                            "Received message from user not in peer list, trying to obtain their public key...")
-                        public_key = self.__find_user_public_key(
-                            decrypted_message["from"])
-                        if len(public_key) > 0:
-                            self.peers[decrypted_message["from"]
-                                       ] = crypto.import_public_key(public_key)
-                            self.dao.save_peers(self.peers)
-                            decrypted_message = crypto.decrypt_message(
-                                self.keypair, self.peers, encrypted_message)
-                        else:
-                            print("Illegal message found, ignoring")
-                    else:
-                        print("Illegal message found, ignoring")
-                else:
-                    conversation_contents = {
-                        "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
-                    if decrypted_message["from"] in self.conversations:
-                        self.conversations[decrypted_message["from"]].append(
-                            conversation_contents)
-                    else:
-                        self.conversations[decrypted_message["from"]] = [
-                            conversation_contents]
-                    print("Pulled down message from " +
-                          decrypted_message["from"])
+                self.__input_and_verify_message(encrypted_message)
             self.dao.save_conversations(self.conversations)
         else:
             print("Looks like there is nothing new.")
@@ -148,6 +126,38 @@ class ClientServices():
         else:
             print("Oops, something went wrong pulling your messages.")
             return []
+
+    def __input_and_verify_message(self, encrypted_message):
+        decrypted_message = crypto.decrypt_message(
+            self.keypair, self.peers, encrypted_message)
+        if self.__is_missing_peer(decrypted_message):
+            print(
+                "Received message from user not in peer list, trying to obtain their public key...")
+            if self.__try_adding_user_public_key(decrypted_message["from"]):
+                print("User found, attempting decryption again.")
+                decrypted_message = crypto.decrypt_message(
+                    self.keypair, self.peers, encrypted_message)
+            else:
+                print("User not found, ignoring.")
+
+        if len(decrypted_message["to"]) == 0:
+            print("Illegal message found, ignoring")
+        else:
+            self.__add_message_to_conversations(decrypted_message)
+
+    def __is_missing_peer(self, decrypted_message):
+        return len(decrypted_message["to"]) == 0 and len(decrypted_message["from"]) > 0
+
+    def __add_message_to_conversations(self, decrypted_message):
+        conversation_contents = {
+            "sent": False, "time": decrypted_message["time"], "message": decrypted_message["message"]}
+        if decrypted_message["from"] in self.conversations:
+            self.conversations[decrypted_message["from"]].append(
+                conversation_contents)
+        else:
+            self.conversations[decrypted_message["from"]] = [
+                conversation_contents]
+        print("Pulled down message from " + decrypted_message["from"])
 
     def __generate_auth_object(self):
         current_date_time = crypto.current_date_time()

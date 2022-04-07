@@ -125,8 +125,8 @@ def __split_long_message(message):
     return [message[i:i+100] for i in range(0, len(message), 100)]
 
 
-def __is_last_element(element, list):
-    return element == list[len(list)-1]
+def __is_last_element(element, list_to_check):
+    return element == list_to_check[len(list_to_check)-1]
 
 
 def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
@@ -136,10 +136,13 @@ def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
     if DETAILED_OUTPUT:
         print("Decrypted message into: " + decrypted_message)
 
+    if decrypted_object["from"] not in peer_public_keys:
+        return {"to": "", "from": decrypted_object["from"], "time": "", "message": "", "hash": "", "signature": ""}
+
     if __verify_decrypted_message(decrypted_object, peer_public_keys):
         return decrypted_object
     else:
-        return {"to": "", "from": decrypted_object["from"], "time": "", "message": "", "hash": "", "signature": ""}
+        return {"to": "", "from": "", "time": "", "message": "", "hash": "", "signature": ""}
 
 
 def __decrypt_long_message(private_key, message):
