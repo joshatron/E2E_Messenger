@@ -196,18 +196,24 @@ class ClientServices():
     def send_message(self):
         recipient = input("Who would you like to send a message to? ")
         if recipient not in self.peers:
-            print("You need to pick someone who is already a peer.")
-        else:
-            to_send = input("What would you like to say? ")
-            self.__send_message_to_server(recipient, to_send)
-            conversation_contents = {
-                "sent": True, "time": crypto.current_date_time().isoformat(), "message": to_send}
-            if recipient in self.conversations:
-                self.conversations[recipient].append(conversation_contents)
+            print(
+                "You don't currently have that user as a peer, let me try and add them.")
+            if self.__try_adding_user_public_key(recipient):
+                print("User successfully found!")
             else:
-                self.conversations[recipient] = [conversation_contents]
-            self.dao.save_conversations(self.conversations)
-            print()
+                print("No one by that username seems to exist")
+                return
+
+        to_send = input("What would you like to say? ")
+        self.__send_message_to_server(recipient, to_send)
+        conversation_contents = {
+            "sent": True, "time": crypto.current_date_time().isoformat(), "message": to_send}
+        if recipient in self.conversations:
+            self.conversations[recipient].append(conversation_contents)
+        else:
+            self.conversations[recipient] = [conversation_contents]
+        self.dao.save_conversations(self.conversations)
+        print()
 
     def __send_message_to_server(self, recipient, message_contents):
         auth = self.__generate_auth_object()
