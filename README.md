@@ -9,6 +9,11 @@ Please note that this is designed for a class, and probably shouldn't be trusted
 Usage
 -----
 
+To run this program, you need to have python >=3.8 installed, as well as pip.
+On debian based systems, you probably will need to run:
+
+    sudo apt install python3-pip
+
 First you need to setup the environment.
 The most basic way is to run the setup script:
 
@@ -21,6 +26,10 @@ If you want to use venv to keep the requirements contained to just the applicati
 To start the server after you have set everything up:
 
     ./runServer
+
+And to start the client, run:
+
+    ./runClient
 
 Server
 ------
