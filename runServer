@@ -14,4 +14,4 @@ command -v uvicorn >/dev/null 2>&1 || { echo >&2 "uvicorn required to run this s
 cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null
 
 # Run server command
-uvicorn e2emessenger.server.server:app --reload --host 0.0.0.0
+uvicorn e2emessenger.server.server:app --host 0.0.0.0
