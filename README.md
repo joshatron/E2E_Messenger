@@ -31,6 +31,14 @@ And to start the client, run:
 
     ./runClient
 
+When running the client, if you don't want to see all the debugging messages for encrypting and decrypting, open the file e2emessenger/crypto/crypto.py and change:
+
+    DETAILED_OUTPUT = True
+
+to:
+
+    DETAILED_OUTPUT = False
+
 Server
 ------
 

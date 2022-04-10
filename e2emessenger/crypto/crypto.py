@@ -100,8 +100,11 @@ def encrypt_message(sender_private_key, receiver_public_key, sender, receiver, t
     final_contents = __generate_final_message_string(
         sender, receiver, time, message, hash_contents, signature_contents)
     if DETAILED_OUTPUT:
-        print("Sending message with following contents: " + final_contents)
-    return __encrypt_long_message(receiver_public_key, final_contents)
+        print("Encrypting message with following contents: " + final_contents)
+    ciphertext = __encrypt_long_message(receiver_public_key, final_contents)
+    if DETAILED_OUTPUT:
+        print("Sending encrypted message: " + ciphertext)
+    return ciphertext
 
 
 def __generate_final_message_string(sender, receiver, time, message, encoded_hash, encoded_signature):
@@ -130,6 +133,8 @@ def __is_last_element(element, list_to_check):
 
 
 def decrypt_message(receiver_private_key, peer_public_keys, ciphertext):
+    if DETAILED_OUTPUT:
+        print("Received encrypted message: " + ciphertext)
     decrypted_message = __decrypt_long_message(
         receiver_private_key, ciphertext)
     decrypted_object = json.loads(decrypted_message)
